@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Scraper output
+scraper/output/*.csv
+scraper/output/*.md
+!scraper/output/.gitkeep
+
+# Local config / secrets
+.env
+*.local
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store

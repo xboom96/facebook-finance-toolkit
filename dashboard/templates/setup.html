@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Setup — Facebook Finance Dashboard{% endblock %}
+{% block content %}
+<div style="max-width: 560px; margin: 0 auto;">
+  <h2>Connect your Facebook Page</h2>
+  <p class="help">
+    You need a <strong>Page Access Token</strong> with <code>read_insights</code>
+    and <code>pages_read_engagement</code> permissions.
+    See <a href="https://github.com/xboom96/facebook-finance-toolkit/blob/main/SETUP_META_TOKEN.md" style="color: var(--accent);">SETUP_META_TOKEN.md</a> for a step-by-step guide.
+  </p>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <div class="card">
+    <form method="POST">
+      <div class="field">
+        <label for="page_id">Facebook Page ID</label>
+        <input type="text" id="page_id" name="page_id" placeholder="e.g. 123456789012345" required />
+        <div class="help">Find it in Meta Business Suite → Settings → Page Info → Page ID.</div>
+      </div>
+      <div class="field">
+        <label for="token">Page Access Token</label>
+        <input type="password" id="token" name="token" placeholder="EAAB..." required />
+        <div class="help">Get one from <a href="https://developers.facebook.com/tools/explorer/" style="color: var(--accent);">Graph API Explorer</a>. Pick your page → Generate Access Token.</div>
+      </div>
+      <div class="field">
+        <label for="rpm">Assumed in-stream RPM (USD per 1k impressions)</label>
+        <input type="number" id="rpm" name="rpm" step="0.5" value="{{ default_rpm }}" />
+        <div class="help">Default $5. Personal finance niche typically sees $5–$15.</div>
+      </div>
+      <div class="field">
+        <label for="version">Graph API Version</label>
+        <input type="text" id="version" name="version" value="{{ default_version }}" />
+      </div>
+      <button type="submit">Connect &rarr;</button>
+    </form>
+  </div>
+  <p class="help" style="margin-top: 16px;">
+    Your token is stored only in your local session cookie. It never leaves this machine.
+  </p>
+</div>
+{% endblock %}
