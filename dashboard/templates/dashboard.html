@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}{{ page.name }} — Dashboard{% endblock %}
+{% block content %}
+
+<div style="display:flex; align-items:center; gap:14px; margin-bottom: 14px;">
+  {% if page.picture and page.picture.data and page.picture.data.url %}
+    <img src="{{ page.picture.data.url }}" style="width:56px;height:56px;border-radius:8px;border:1px solid var(--border);" />
+  {% endif %}
+  <div>
+    <div style="font-size:18px; font-weight:600;">{{ page.name }}</div>
+    <div style="color: var(--muted); font-size: 13px;">
+      Followers: <strong>{{ "{:,}".format(page.followers_count or page.fan_count or 0) }}</strong>
+      &nbsp;·&nbsp;
+      <a href="{{ page.link }}" target="_blank">View page →</a>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="card">
+    <div class="stat-label">Impressions (last {{ totals.post_count }} posts)</div>
+    <div class="stat-value">{{ "{:,}".format(totals.impressions) }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Reach</div>
+    <div class="stat-value">{{ "{:,}".format(totals.reach) }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Avg engagement rate</div>
+    <div class="stat-value">{{ totals.avg_eng_rate }}%</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Est. revenue (RPM ${{ rpm }})</div>
+    <div class="stat-value stat-accent">${{ "{:,.2f}".format(totals.revenue) }}</div>
+  </div>
+</div>
+
+<h2>Top 10 posts by estimated revenue</h2>
+<div class="card" style="padding: 0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th class="num">Impressions</th>
+        <th class="num">Reach</th>
+        <th class="num">Engagement</th>
+        <th class="num">Avg watch</th>
+        <th class="num">Est. revenue</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in by_revenue %}
+      <tr>
+        <td>{{ p.created_time[:10] }}</td>
+        <td class="title">
+          {% if p.permalink %}<a href="{{ p.permalink }}" target="_blank">{{ p.message or '(no caption)' }}</a>
+          {% else %}{{ p.message or '(no caption)' }}{% endif %}
+        </td>
+        <td class="num">{{ "{:,}".format(p.impressions) }}</td>
+        <td class="num">{{ "{:,}".format(p.reach) }}</td>
+        <td class="num">{{ p.engagement_rate }}%</td>
+        <td class="num">{{ p.avg_watch_seconds }}s</td>
+        <td class="num stat-accent">${{ "{:,.2f}".format(p.estimated_revenue(rpm)) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Top 10 posts by engagement rate</h2>
+<div class="card" style="padding: 0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th class="num">Reach</th>
+        <th class="num">Reactions</th>
+        <th class="num">Comments</th>
+        <th class="num">Shares</th>
+        <th class="num">Eng. rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in by_engagement %}
+      <tr>
+        <td>{{ p.created_time[:10] }}</td>
+        <td class="title">
+          {% if p.permalink %}<a href="{{ p.permalink }}" target="_blank">{{ p.message or '(no caption)' }}</a>
+          {% else %}{{ p.message or '(no caption)' }}{% endif %}
+        </td>
+        <td class="num">{{ "{:,}".format(p.reach) }}</td>
+        <td class="num">{{ p.reactions }}</td>
+        <td class="num">{{ p.comments }}</td>
+        <td class="num">{{ p.shares }}</td>
+        <td class="num stat-accent">{{ p.engagement_rate }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>All recent posts</h2>
+<div class="card" style="padding: 0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th class="num">Impressions</th>
+        <th class="num">Video views</th>
+        <th class="num">Avg watch</th>
+        <th class="num">Eng. rate</th>
+        <th class="num">Est. $</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in posts %}
+      <tr>
+        <td>{{ p.created_time[:10] }}</td>
+        <td class="title">{{ p.message or '(no caption)' }}</td>
+        <td class="num">{{ "{:,}".format(p.impressions) }}</td>
+        <td class="num">{{ "{:,}".format(p.video_views) }}</td>
+        <td class="num">{{ p.avg_watch_seconds }}s</td>
+        <td class="num">{{ p.engagement_rate }}%</td>
+        <td class="num">${{ "{:,.2f}".format(p.estimated_revenue(rpm)) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p class="help" style="margin-top: 18px;">
+  <strong>Note on revenue estimates:</strong> Meta's in-stream / Reels Play earnings are not directly exposed
+  per post via the public Graph API. The "Est. revenue" column applies your configured RPM
+  (currently <strong>${{ rpm }}/1k impressions</strong>) to each post's impressions count.
+  Calibrate the RPM in <a href="{{ url_for('setup') }}">Setup</a> by dividing your real monthly
+  earnings (from Creator Studio) by your real monthly impressions × 1000.
+</p>
+{% endblock %}
