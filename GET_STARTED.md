@@ -4,6 +4,8 @@ A complete beginner walkthrough. **Total time: ~3 hours over 2 days**, then 30�
 
 > Do these in order. Skip nothing on the first pass.
 
+> **NEW: Automated shortcut** — if you don't want to learn CapCut, the repo ships a one-command Reel generator at [`scripts/generate_reel.py`](scripts/generate_reel.py). Skip to **Appendix A** at the bottom of this guide for the automated workflow. You can still do the full manual workflow below to learn each step.
+
 ---
 
 ## DAY 1 — Setup (about 2 hours total)
@@ -335,5 +337,90 @@ These are *realistic* numbers for a faceless finance niche starting from zero. T
 ---
 
 That's it. The whole flow is: **scrape → script → voice → B-roll → edit → schedule → engage → measure → repeat.**
+
+---
+
+## Appendix A — The 1-command automated workflow
+
+If you'd rather skip CapCut entirely and let the toolkit produce a finished Reel MP4 for you, use [`scripts/generate_reel.py`](scripts/generate_reel.py).
+
+### What you'll need
+
+| Tool | What it's for | How to install |
+|---|---|---|
+| Python 3 | Run the script | step 1 above |
+| ffmpeg | Build the video | **Mac**: `brew install ffmpeg` · **Linux**: `sudo apt install ffmpeg` · **Windows**: <https://www.gyan.dev/ffmpeg/builds/> → download "release essentials" → unzip → add the `bin` folder to PATH |
+| gTTS | Free AI voice (Google TTS) | `pip install gtts` |
+
+### 4-step daily workflow
+
+#### A1. Get today's topic
+
+```bash
+python3 scraper/run.py --limit 10 --skip-reddit
+```
+
+Open `scraper/output/trending-YYYY-MM-DD.md`. Pick one **Hook idea**.
+
+#### A2. Write a script file
+
+Copy `scripts/reel-template.json` to `scripts/today.json` and edit the topic, hook, sections, and CTA. Aim for **3–6 sections** so the Reel lands at 45–80 seconds.
+
+You can author each section by hand, or paste the trending topic into ChatGPT/Claude with this prompt:
+
+```
+Write a JSON file matching this exact schema:
+{
+  "topic": "<topic>",
+  "hook": "<6-8 word punchy hook ending in a period>",
+  "sections": [
+    {"header": "1. <SHORT CAPS LABEL>", "text": "<~30 word voiceover>"},
+    {"header": "2. <SHORT CAPS LABEL>", "text": "<~30 word voiceover>"},
+    ...
+  ],
+  "cta": "Follow for daily money tips."
+}
+
+Topic: <paste hook idea here>
+Audience: US personal-finance beginners.
+Tone: friendly, direct, no jargon, no financial-advice claims.
+4 to 5 sections total.
+```
+
+Save the model's output as `scripts/today.json`.
+
+#### A3. Generate the video
+
+```bash
+python3 scripts/generate_reel.py scripts/today.json today.mp4
+```
+
+That produces `today.mp4` — a 1080×1920 vertical Reel with synced captions, hook card, and CTA. Takes about 30–60 seconds depending on your computer.
+
+Want a different accent?
+- US (default): no flag needed
+- UK: add `--tts-tld co.uk`
+- Australia: add `--tts-tld com.au`
+- Canada: add `--tts-tld ca`
+- Indian English: add `--tts-tld co.in`
+
+#### A4. Upload to Meta Business Suite
+
+1. <https://business.facebook.com/> → your page → **Content** → **Create post** → **Reel**.
+2. Upload `today.mp4`.
+3. Paste a 200-character caption with 3–5 hashtags (#money #personalfinance #saving etc.).
+4. Schedule for **6 PM EST** tomorrow.
+
+### Upgrading the voice (optional)
+
+gTTS is functional but flat. For more natural voices:
+
+- **ElevenLabs** (free 10k chars/mo): generate the voice on their site, save as `voice.mp3`, then concatenate sections manually. Or wire up the ElevenLabs API in `scripts/generate_reel.py` by replacing the `synth_voice` function.
+
+### Upgrading the background (optional)
+
+The current version uses a dark gradient. To add B-roll from Pexels, search <https://www.pexels.com/videos/> for finance-y keywords (money, calculator, laptop, city), download a few clips, and modify the `build_filtergraph` function to overlay them. PRs welcome.
+
+---
 
 If you get stuck at any step, message me with the step number and a screenshot of the error.

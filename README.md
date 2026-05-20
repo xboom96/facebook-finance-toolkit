@@ -1,10 +1,11 @@
 # Facebook Finance Toolkit
 
-A 3-part toolkit for transitioning a Facebook page into a high-CPM personal-finance niche:
+A 4-part toolkit for transitioning a Facebook page into a high-CPM personal-finance niche:
 
 1. **[`STRATEGY.md`](STRATEGY.md)** — 30-day content plan, content pillars, viral hook templates, faceless video format, monetization stacking, and a migration playbook.
 2. **[`scraper/`](scraper/)** — pulls today's trending personal-finance content (Google News, Reddit, Hacker News, optional YouTube) into a daily CSV/Markdown report you can use as Reel ideas.
 3. **[`dashboard/`](dashboard/)** — a small Flask web app that reads your Facebook Page metrics via the Meta Graph API and ranks your posts by estimated revenue and engagement.
+4. **[`scripts/generate_reel.py`](scripts/generate_reel.py)** — fully-automated Reel generator. Takes a JSON script and produces a finished 1080×1920 MP4 with AI voiceover and synchronized captions — no CapCut needed for the daily grind.
 
 > **Niche:** Personal Finance · **Language:** English · **Style:** Faceless (text + stock + AI voice)
 > Built to help boost Content Monetization earnings on a Facebook page.
@@ -28,6 +29,10 @@ python3 dashboard/app.py --demo
 
 # 4. When you're ready for real data — see SETUP_META_TOKEN.md
 python3 dashboard/app.py
+
+# 5. Generate a finished Reel MP4 in one command (needs ffmpeg + gtts)
+pip install gtts
+python3 scripts/generate_reel.py scripts/reel-template.json my-reel.mp4
 ```
 
 ---
@@ -147,6 +152,7 @@ Once you've calibrated, the dashboard tells you **which posts earn the most per 
 ```
 facebook-finance-toolkit/
 ├── README.md                 ← this file
+├── GET_STARTED.md            ← 21-step beginner walkthrough
 ├── STRATEGY.md               ← 30-day content playbook
 ├── SETUP_META_TOKEN.md       ← how to get a Page Access Token
 ├── docs/
@@ -154,11 +160,56 @@ facebook-finance-toolkit/
 ├── scraper/
 │   ├── run.py                ← trending content scraper
 │   └── output/               ← daily CSV + Markdown reports
-└── dashboard/
-    ├── app.py                ← Flask app
-    ├── requirements.txt
-    └── templates/            ← Jinja2 HTML
+├── dashboard/
+│   ├── app.py                ← Flask app
+│   ├── requirements.txt
+│   └── templates/            ← Jinja2 HTML
+└── scripts/
+    ├── generate_reel.py      ← script.json → finished 1080×1920 MP4
+    └── reel-template.json    ← example script (5 subscriptions to cancel)
 ```
+
+---
+
+## 4. Reel generator ([`scripts/generate_reel.py`](scripts/generate_reel.py))
+
+Generates a finished 9:16 1080×1920 MP4 (the format Facebook Reels expects) from a single JSON script file. No CapCut needed.
+
+### What it does
+
+1. Reads a JSON file with a hook, 3–7 sections, and a CTA.
+2. Synthesizes the voiceover using **gTTS** (free, no API key). Per-section MP3s are probed for exact duration so captions stay in sync with the voice.
+3. Concatenates the audio into a single track.
+4. Renders a vertical video with:
+   - A subtle dark navy gradient background.
+   - A bold opening hook card (first 3 seconds).
+   - Section header (green) + body caption (white) per section, perfectly synced to the voice.
+   - A green CTA card at the end.
+   - A bottom-bar page brand label.
+5. Muxes audio + video into a single MP4 ready to upload to Meta Business Suite.
+
+### Prerequisites
+
+- `ffmpeg` (`sudo apt install ffmpeg` on Linux, `brew install ffmpeg` on macOS).
+- `pip install gtts`
+- A bold sans-serif font (DejaVu/FreeSans on Linux are auto-detected).
+
+### Run it
+
+```bash
+pip install gtts
+python3 scripts/generate_reel.py scripts/reel-template.json my-reel.mp4
+
+# Different accent (UK, AU, Indian English, etc.)
+python3 scripts/generate_reel.py scripts/reel-template.json my-reel.mp4 --tts-tld co.uk
+python3 scripts/generate_reel.py scripts/reel-template.json my-reel.mp4 --tts-tld com.au
+```
+
+### Authoring your own scripts
+
+Copy `scripts/reel-template.json` and edit the topic, hook, sections, and CTA. Run the generator again — that's the daily content workflow.
+
+For higher-quality voiceovers, use ElevenLabs instead of gTTS: synthesize the voice over per section, save them as `sec1.mp3`, `sec2.mp3`, …, `cta.mp3` next to your script.json, and skip the synth step. Or replace the `synth_voice` function with an ElevenLabs API call (free tier supports ~10k chars/month).
 
 ---
 

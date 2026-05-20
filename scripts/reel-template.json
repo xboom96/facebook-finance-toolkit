@@ -1,0 +1,27 @@
+{
+  "topic": "5 subscriptions to cancel today (save $1,200/year)",
+  "hook": "5 subscriptions to cancel TODAY.",
+  "sections": [
+    {
+      "header": "1. STREAMING APPS",
+      "text": "Most people pay for four or five streaming services and only watch one. Pick your favorite. Cancel the rest. That alone saves about thirty dollars every month."
+    },
+    {
+      "header": "2. UNUSED GYM",
+      "text": "If you have not been to the gym in the last thirty days, you are donating money. Cancel it. Walk outside or use free YouTube workouts instead."
+    },
+    {
+      "header": "3. CLOUD STORAGE",
+      "text": "You are probably paying for iCloud, Google Drive, and Dropbox. You only need one. Pick the cheapest plan that fits your files and drop the rest."
+    },
+    {
+      "header": "4. APP TRIALS",
+      "text": "Go to your phone settings, subscriptions. You will find at least two apps you forgot about, still charging you every single month. Cancel them now."
+    },
+    {
+      "header": "5. CREDIT MONITORING",
+      "text": "You do not need to pay for credit monitoring. Your bank and Credit Karma already give it to you for free. That is another fifteen dollars a month back in your pocket."
+    }
+  ],
+  "cta": "Follow for daily money tips."
+}
