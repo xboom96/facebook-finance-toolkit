@@ -11,6 +11,13 @@ scraper/output/*.csv
 scraper/output/*.md
 !scraper/output/.gitkeep
 
+# Shorts pipeline output (generated MP4s, audio, scripts, etc.)
+shorts/output/*
+!shorts/output/.gitkeep
+
+# Adobe Stock generated CSVs
+adobe-stock/adobe_stock*.csv
+
 # Local config / secrets
 .env
 *.local
