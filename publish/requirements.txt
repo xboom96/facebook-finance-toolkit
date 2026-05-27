@@ -1,0 +1,4 @@
+# publish/ uses only the Python standard library (urllib + json + http.client).
+# This file exists so `pip install -r publish/requirements.txt` is a no-op
+# rather than failing — handy for the unified setup commands in the root
+# README.

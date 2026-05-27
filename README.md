@@ -1,6 +1,6 @@
 # Facebook Finance Toolkit
 
-A six-module toolkit for monetizing a faceless personal-finance presence — from Facebook page content all the way to Fiverr fulfilment and Adobe Stock passive income.
+A seven-module toolkit for monetizing a faceless personal-finance presence — from Facebook page content all the way to Fiverr fulfilment and Adobe Stock passive income.
 
 **Strategy & content**
 
@@ -11,8 +11,9 @@ A six-module toolkit for monetizing a faceless personal-finance presence — fro
 **Production & monetization**
 
 4. **[`shorts/`](shorts/)** — end-to-end faceless YT Shorts / Facebook Reels / TikTok pipeline. Topic → AI script → free TTS voiceover → vertical 1080×1920 H.264 MP4 with overlays + burned captions. One command, no API keys required.
-5. **[`fiverr/`](fiverr/)** — gig audit + three optimized 2026-ready gig templates (long-form YT, Shorts/Reels, done-for-you AI faceless package) plus a 14-day Level-2 revival checklist and Buyer-Request outreach templates.
-6. **[`adobe-stock/`](adobe-stock/)** — batch metadata generator for Adobe Stock contributor uploads. Curated keyword libraries for the 4 highest-CPM niches (finance, business, AI/tech, lifestyle), plus a strategy doc on what to actually shoot/render.
+5. **[`publish/`](publish/)** — auto-publish the generated MP4 straight to your Facebook Page as a Reel or classic Video via the Meta Graph API. Stdlib-only, dry-run-safe, and bolted onto `shorts/pipeline.py` with a single `--publish-fb reels` flag.
+6. **[`fiverr/`](fiverr/)** — gig audit + three optimized 2026-ready gig templates (long-form YT, Shorts/Reels, done-for-you AI faceless package) plus a 14-day Level-2 revival checklist and Buyer-Request outreach templates.
+7. **[`adobe-stock/`](adobe-stock/)** — batch metadata generator for Adobe Stock contributor uploads. Curated keyword libraries for the 4 highest-CPM niches (finance, business, AI/tech, lifestyle), plus a strategy doc on what to actually shoot/render.
 
 > **Niche:** Personal Finance · **Language:** English · **Style:** Faceless (text + stock + AI voice)
 > Built to help boost Content Monetization earnings on a Facebook page **and** to pay the bills with Fiverr + Adobe Stock while the page grows.
@@ -45,6 +46,11 @@ python3 dashboard/app.py
 
 # 6. Tag a folder of stock photos for Adobe Stock upload
 python3 adobe-stock/prep.py ./my-photos --niche finance --out adobe_stock.csv
+
+# 7. Generate a Short AND publish it straight to your Facebook Page (set token first)
+export META_PAGE_ID=…
+export META_PAGE_TOKEN=…
+python3 shorts/pipeline.py --topic "…" --publish-fb reels
 ```
 
 ---
@@ -182,7 +188,33 @@ full architecture and roadmap.
 
 ---
 
-## 5. Fiverr revival + gigs ([`fiverr/`](fiverr/))
+## 5. Auto-publish to your Facebook Page ([`publish/`](publish/))
+
+Closes the loop between the `shorts/` pipeline and your Facebook Page so a
+fresh Short can go from idea to live Reel in a single command:
+
+```bash
+# Render + publish in one shot
+export META_PAGE_ID=123456789012345
+export META_PAGE_TOKEN=EAAG…             # see publish/README.md for how to mint this
+python3 shorts/pipeline.py --topic "5 subscriptions to cancel today" --publish-fb reels
+
+# Batch from today's trending hooks → 5 Reels uploaded back-to-back
+python3 shorts/pipeline.py --from-scraper --limit 5 --publish-fb reels
+
+# Dry-run first (no Meta calls, just shows what would be uploaded)
+python3 -m publish.cli --short shorts/output/<date>/<slug> --as reels --dry-run
+```
+
+Supports both the **Reels API** (3-phase resumable upload, native Reel
+placement, eligible for Reels Play bonus where available) and the
+**classic Videos API** (single multipart upload). See
+[`publish/README.md`](publish/README.md) for the 10-minute token setup
+guide and failure modes.
+
+---
+
+## 6. Fiverr revival + gigs ([`fiverr/`](fiverr/))
 
 If you already have a Fiverr seller account, this is the fastest path to
 cash. It has:
@@ -195,7 +227,7 @@ cash. It has:
 
 ---
 
-## 6. Adobe Stock contributor pipeline ([`adobe-stock/`](adobe-stock/))
+## 7. Adobe Stock contributor pipeline ([`adobe-stock/`](adobe-stock/))
 
 Batch metadata generator + niche keyword libraries for Adobe Stock
 contributors. Walks a folder of images/videos and writes the exact CSV
@@ -233,6 +265,11 @@ facebook-finance-toolkit/
 │   ├── tts.py                ← script → Edge-TTS voiceover
 │   ├── render.py             ← FFmpeg + Pillow video renderer
 │   └── output/               ← generated MP4s + scripts
+├── publish/                  ← Facebook Page auto-publish
+│   ├── fb_reels.py           ← Reels API (resumable upload)
+│   ├── fb_video.py           ← classic Videos API (multipart)
+│   ├── cli.py                ← `python -m publish.cli ...`
+│   └── test_smoke.py         ← offline test suite (urlopen mocked)
 ├── fiverr/                   ← gig templates + revival checklist
 └── adobe-stock/              ← batch metadata generator
     ├── prep.py
@@ -248,7 +285,9 @@ facebook-finance-toolkit/
 - Add Instagram Reels parallel scraping (`graph.instagram.com`).
 - Schedule the scraper as a daily cron job and email the Markdown report.
 - Auto-upload generated `shorts/output/*/short.mp4` to YouTube via the Data API.
-- Auto-publish Reels via Meta's `/{ig-user-id}/media` Graph API endpoint.
+- ✓ Auto-publish Reels via Meta's `/{page-id}/video_reels` Graph API endpoint — shipped in [`publish/`](publish/).
+- Mirror to Instagram Reels via the `/{ig-user-id}/media` endpoint (next).
+- SFTP-upload generated CSVs straight to the Adobe Stock contributor portal (next).
 - Direct SFTP upload step in `adobe-stock/prep.py` (Adobe contributor SFTP credentials).
 
 ---

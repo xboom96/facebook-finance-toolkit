@@ -293,6 +293,20 @@ def main() -> int:
         help="Skip burning word-by-word captions",
     )
     p.add_argument("--seed", type=int, default=None)
+    p.add_argument(
+        "--publish-fb",
+        choices=["reels", "video"],
+        default=None,
+        help=(
+            "After rendering, publish straight to your Facebook Page. "
+            "Requires META_PAGE_ID + META_PAGE_TOKEN env vars (see publish/README.md)."
+        ),
+    )
+    p.add_argument(
+        "--publish-dry-run",
+        action="store_true",
+        help="With --publish-fb, do not actually call Meta \u2014 just print the request.",
+    )
     args = p.parse_args()
 
     topics: list[str] = []
@@ -315,7 +329,7 @@ def main() -> int:
 
     for t in topics:
         try:
-            render_one(
+            out_path = render_one(
                 t,
                 voice=args.voice,
                 rate=args.rate,
@@ -327,7 +341,73 @@ def main() -> int:
             )
         except Exception as exc:  # keep batch going
             print(f"  ! failed on '{t}': {exc}", file=sys.stderr)
+            continue
+
+        if args.publish_fb:
+            try:
+                _publish_to_fb(
+                    out_path.parent,
+                    kind=args.publish_fb,
+                    dry_run=args.publish_dry_run,
+                )
+            except Exception as exc:  # noqa: BLE001
+                print(f"  ! publish failed for '{t}': {exc}", file=sys.stderr)
     return 0
+
+
+def _publish_to_fb(short_dir: Path, *, kind: str, dry_run: bool) -> None:
+    """Tiny shim that defers the import of the publish module so the shorts
+    pipeline keeps working even if publish/ has not been set up.
+    """
+    # Make sure the repo root is on sys.path so `import publish` works when
+    # this file is executed as a script.
+    repo_root = THIS_DIR.parent
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    from publish.fb_reels import FBReelsClient, credentials_from_env as reels_creds
+    from publish.fb_video import FBVideoClient, credentials_from_env as video_creds
+
+    mp4 = short_dir / "short.mp4"
+    meta_path = short_dir / "metadata.json"
+    description = ""
+    if meta_path.exists():
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            description = (meta.get("description") or "").strip()
+        except Exception:  # noqa: BLE001
+            description = ""
+
+    if kind == "reels":
+        creds = (
+            {"page_id": "DRY_RUN_PAGE", "page_token": "DRY_RUN_TOKEN", "graph_version": "v19.0"}
+            if dry_run
+            else reels_creds()
+        )
+        client = FBReelsClient(
+            page_id=creds["page_id"],
+            page_token=creds["page_token"],
+            graph_version=creds["graph_version"],
+            dry_run=dry_run,
+        )
+        result = client.publish(mp4, description=description)
+    else:
+        creds = (
+            {"page_id": "DRY_RUN_PAGE", "page_token": "DRY_RUN_TOKEN", "graph_version": "v19.0"}
+            if dry_run
+            else video_creds()
+        )
+        client = FBVideoClient(
+            page_id=creds["page_id"],
+            page_token=creds["page_token"],
+            graph_version=creds["graph_version"],
+            dry_run=dry_run,
+        )
+        result = client.publish(mp4, description=description)
+
+    if result.dry_run:
+        print(f"  ~ dry-run publish ok ({kind}): would upload {result.bytes_uploaded:,} bytes")
+    else:
+        print(f"  \u2713 published ({kind}): video_id={result.video_id} {result.permalink or ''}")
 
 
 if __name__ == "__main__":
