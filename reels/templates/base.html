@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Viral Reels Script Generator{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #1a1d24;
+      --border: #2a2f3a;
+      --text: #e7e9ee;
+      --muted: #8a93a4;
+      --accent: #4ade80;
+      --accent2: #60a5fa;
+      --warn: #fbbf24;
+      --err: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    header {
+      background: #14171d;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+    header .tag { background: var(--accent); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    main { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin: 0 0 12px; }
+    h3 { font-size: 14px; margin: 0 0 4px; }
+    .muted { color: var(--muted); }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: #232833; color: var(--muted); }
+    .seg { border-left: 2px solid var(--border); padding: 0 0 12px 14px; margin-bottom: 4px; }
+    .seg:hover { border-left-color: var(--accent); }
+    .seg .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .seg .vo { margin: 4px 0; }
+    .seg .onscreen { display: inline-block; font-weight: 600; background: #232833; padding: 2px 8px; border-radius: 4px; font-size: 12px; letter-spacing: 0.04em; }
+    .seg .visual { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    ul { margin: 6px 0; padding-left: 20px; }
+    li { margin: 3px 0; }
+    pre { background: #0f1115; border: 1px solid var(--border); border-radius: 6px; padding: 12px; white-space: pre-wrap; word-wrap: break-word; font-size: 13px; margin: 0; }
+    .tags span { display: inline-block; color: var(--accent2); margin-right: 8px; font-size: 13px; }
+    form .row { display: flex; gap: 14px; flex-wrap: wrap; }
+    form .field { margin-bottom: 14px; flex: 1; min-width: 180px; }
+    form label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    form input, form select { width: 100%; padding: 10px 12px; background: #0f1115; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 14px; }
+    form input:focus, form select:focus { outline: none; border-color: var(--accent); }
+    button { background: var(--accent); color: #000; border: 0; padding: 11px 22px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
+    button:hover { filter: brightness(1.1); }
+    .err { background: rgba(248, 113, 113, 0.12); border: 1px solid var(--err); color: var(--err); padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; }
+    .why { color: var(--warn); font-size: 13px; }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .copybtn { float: right; background: #232833; color: var(--muted); font-weight: 500; padding: 4px 10px; font-size: 12px; }
+    a { color: var(--accent2); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Viral Reels Script Generator</h1>
+    <span class="tag">FACELESS</span>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    function copyText(id) {
+      const el = document.getElementById(id);
+      navigator.clipboard.writeText(el.innerText);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h2>Generate a Reel</h2>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <form method="post">
+    <div class="row">
+      <div class="field">
+        <label for="niche">Niche</label>
+        <input list="niches" id="niche" name="niche" value="{{ form.niche }}" placeholder="personal finance" />
+        <datalist id="niches">
+          {% for n in example_niches %}<option value="{{ n }}">{% endfor %}
+        </datalist>
+      </div>
+      <div class="field" style="flex: 2;">
+        <label for="topic">Topic</label>
+        <input id="topic" name="topic" value="{{ form.topic }}" placeholder="3 money mistakes that keep you broke" required />
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="date">Publish date</label>
+        <input type="date" id="date" name="date" value="{{ form.date or today }}" />
+      </div>
+      <div class="field">
+        <label for="duration">Duration (seconds)</label>
+        <select id="duration" name="duration">
+          {% for d in durations %}
+          <option value="{{ d }}" {% if form.duration == d %}selected{% endif %}>{{ d }}s</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="seed">Seed (optional)</label>
+        <input type="number" id="seed" name="seed" value="{{ form.seed if form.seed is not none else '' }}" placeholder="random" />
+        <div class="hint">Same seed + inputs = same script.</div>
+      </div>
+    </div>
+    <button type="submit">Generate script</button>
+  </form>
+</div>
+
+{% if pkg %}
+<div class="meta">
+  <span class="pill">🎯 {{ pkg.niche }}</span>
+  <span class="pill">📅 {{ pkg.date }}</span>
+  <span class="pill">⏱️ {{ pkg.duration_seconds }}s · ~{{ pkg.word_count() }} words</span>
+  <span class="pill">📈 Best time: {{ pkg.best_time_to_post }}</span>
+</div>
+
+<div class="card">
+  <h2>Title</h2>
+  <h3>{{ pkg.title }}</h3>
+</div>
+
+<div class="card">
+  <h2>Hook (first 3 seconds)</h2>
+  <p class="vo">🎙️ {{ pkg.hook.spoken }}</p>
+  <p><span class="seg"><span class="onscreen">{{ pkg.hook.on_screen }}</span></span></p>
+  <p class="why">💡 Why it works: {{ pkg.hook.why_it_works }}</p>
+</div>
+
+<div class="card">
+  <h2>Voiceover script</h2>
+  {% for s in pkg.segments %}
+  <div class="seg">
+    <div class="label">{{ s.label }} · ~{{ s.seconds }}s</div>
+    <div class="vo">🎙️ {{ s.voiceover }}</div>
+    <div><span class="onscreen">{{ s.on_screen }}</span></div>
+    <div class="visual">🎬 {{ s.visual }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Visual ideas / B-roll</h2>
+    <ul>
+      {% for v in pkg.visual_ideas %}<li>{{ v }}</li>{% endfor %}
+    </ul>
+    <h2 style="margin-top:16px;">Music & pacing</h2>
+    <p>{{ pkg.music }}</p>
+  </div>
+  <div class="card">
+    <h2>Viral checklist</h2>
+    <ul>
+      {% for c in pkg.viral_checklist %}<li>{{ c }}</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Caption <button type="button" class="copybtn" onclick="copyText('caption')">Copy</button></h2>
+  <pre id="caption">{{ pkg.caption }}</pre>
+</div>
+
+<div class="card">
+  <h2>Description <button type="button" class="copybtn" onclick="copyText('description')">Copy</button></h2>
+  <pre id="description">{{ pkg.description }}</pre>
+</div>
+
+<div class="card">
+  <h2>Tags <button type="button" class="copybtn" onclick="copyText('tags')">Copy</button></h2>
+  <div class="tags" id="tags">{% for t in pkg.tags %}<span>#{{ t }}</span>{% endfor %}</div>
+</div>
+{% endif %}
+
+{% endblock %}
