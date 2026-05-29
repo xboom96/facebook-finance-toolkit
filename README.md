@@ -1,10 +1,11 @@
 # Facebook Finance Toolkit
 
-A 3-part toolkit for transitioning a Facebook page into a high-CPM personal-finance niche:
+A 4-part toolkit for transitioning a Facebook page into a high-CPM personal-finance niche:
 
 1. **[`STRATEGY.md`](STRATEGY.md)** — 30-day content plan, content pillars, viral hook templates, faceless video format, monetization stacking, and a migration playbook.
 2. **[`scraper/`](scraper/)** — pulls today's trending personal-finance content (Google News, Reddit, Hacker News, optional YouTube) into a daily CSV/Markdown report you can use as Reel ideas.
-3. **[`dashboard/`](dashboard/)** — a small Flask web app that reads your Facebook Page metrics via the Meta Graph API and ranks your posts by estimated revenue and engagement.
+3. **[`reels/`](reels/)** — a viral Reels **script generator** (CLI + Flask app). Input niche, topic, date and duration → get a full Reel package: hook, voiceover script, visual ideas, caption, title, description and tags. Offline, no API key.
+4. **[`dashboard/`](dashboard/)** — a small Flask web app that reads your Facebook Page metrics via the Meta Graph API and ranks your posts by estimated revenue and engagement.
 
 > **Niche:** Personal Finance · **Language:** English · **Style:** Faceless (text + stock + AI voice)
 > Built to help boost Content Monetization earnings on a Facebook page.
@@ -21,12 +22,18 @@ cd facebook-finance-toolkit
 # 2. Generate today's content ideas (no auth required)
 python3 scraper/run.py --limit 10
 
-# 3. Run the dashboard in demo mode (no Facebook auth required)
+# 3. Turn an idea into a full Reel script package (no auth required)
+python3 reels/generate.py --niche "personal finance" --topic "3 money mistakes that keep you broke" --duration 60
+# ...or run the web app:
+pip install -r reels/requirements.txt
+python3 reels/app.py            # open http://127.0.0.1:5001
+
+# 4. Run the dashboard in demo mode (no Facebook auth required)
 pip install -r dashboard/requirements.txt
 python3 dashboard/app.py --demo
 # open http://127.0.0.1:5000
 
-# 4. When you're ready for real data — see SETUP_META_TOKEN.md
+# 5. When you're ready for real data — see SETUP_META_TOKEN.md
 python3 dashboard/app.py
 ```
 
@@ -99,13 +106,42 @@ python3 scraper/run.py --limit 10
 # Open today's report
 xdg-open scraper/output/trending-$(date +%F).md   # or `open` on macOS
 
-# Pick 1 hook → paste into ChatGPT/Claude with the prompt from docs/prompts.md
-# → generate script → ElevenLabs voice → CapCut edit → post at 6 PM EST
+# Pick 1 hook → feed it to the Reels generator → script → AI voice → CapCut edit → post
+python3 reels/generate.py --topic "<picked hook>" --duration 60
 ```
 
 ---
 
-## 3. Meta Graph API earnings dashboard ([`dashboard/app.py`](dashboard/app.py))
+## 3. Viral Reels script generator ([`reels/`](reels/))
+
+Turn a single idea into a complete, ready-to-shoot Reel package. **No API key, no login.**
+
+Inputs: **niche**, **topic**, **date**, **duration** → outputs a scroll-stopping
+**hook** (with *why it works*), a full **voiceover script** (Hook → Promise →
+Value beats → Proof → CTA → Loop), **visual ideas / B-roll**, a **title**,
+**caption**, **description**, **tags**, plus a music/pacing suggestion and a
+viral checklist. It is niche-agnostic and fully deterministic (seedable).
+
+```bash
+# CLI (Markdown)
+python3 reels/generate.py --niche "personal finance" \
+  --topic "3 money mistakes that keep you broke" --date 2026-05-29 --duration 60
+
+# CLI (JSON)
+python3 reels/generate.py --niche fitness --topic "morning routine" --json
+
+# Web app
+pip install -r reels/requirements.txt
+python3 reels/app.py            # open http://127.0.0.1:5001
+# JSON API: /api/generate?niche=travel&topic=cheap+flights+hack&duration=30
+```
+
+The number of value beats scales with the target duration, and a proof beat is
+added for clips ≥45s. See [`reels/README.md`](reels/README.md) for full docs.
+
+---
+
+## 4. Meta Graph API earnings dashboard ([`dashboard/app.py`](dashboard/app.py))
 
 Small Flask app that shows:
 
@@ -154,6 +190,11 @@ facebook-finance-toolkit/
 ├── scraper/
 │   ├── run.py                ← trending content scraper
 │   └── output/               ← daily CSV + Markdown reports
+├── reels/
+│   ├── generate.py           ← viral Reel script generator (CLI)
+│   ├── app.py                ← Flask web app
+│   ├── requirements.txt
+│   └── templates/            ← Jinja2 HTML
 └── dashboard/
     ├── app.py                ← Flask app
     ├── requirements.txt
